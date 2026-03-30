@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-deep-900 text-white font-sans;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-coral-500 hover:bg-coral-600 text-white font-semibold px-6 py-3 rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-coral-500/30 hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-secondary {
+    @apply bg-ocean-700 hover:bg-ocean-600 text-white font-semibold px-6 py-3 rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-ocean-700/30 hover:-translate-y-0.5;
+  }
+
+  .btn-outline {
+    @apply border-2 border-ocean-400 text-ocean-400 hover:bg-ocean-400 hover:text-deep-900 font-semibold px-6 py-3 rounded-full transition-all duration-300;
+  }
+
+  .card {
+    @apply bg-deep-800 border border-ocean-900/50 rounded-2xl overflow-hidden transition-all duration-300 hover:border-ocean-600/50 hover:shadow-xl hover:shadow-ocean-900/50 hover:-translate-y-1;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-bold text-white;
+  }
+
+  .section-subtitle {
+    @apply text-ocean-300 text-lg mt-3;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-ocean-400 to-aqua-400 bg-clip-text text-transparent;
+  }
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #060d1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #0097a7;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00bcd4;
+}
+
+/* Animación de burbujas */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), rgba(0,188,212,0.1));
+  border: 1px solid rgba(0,188,212,0.3);
+  animation: bubble-rise linear infinite;
+}
+
+@keyframes bubble-rise {
+  0% {
+    transform: translateY(100vh) translateX(0) scale(0.5);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-10vh) translateX(30px) scale(1);
+    opacity: 0;
+  }
+}
