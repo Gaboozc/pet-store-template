@@ -27,7 +27,7 @@ export default function CartDrawer() {
             <h2 className="text-lg font-bold text-white">Tu Carrito</h2>
             {itemCount > 0 && (
               <span className="bg-ocean-700 text-ocean-200 text-xs font-bold px-2 py-0.5 rounded-full">
-                {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                {itemCount} {itemCount === 1 ? 'artículo' : 'artículos'}
               </span>
             )}
           </div>

@@ -1,15 +1,13 @@
-import { createContext, useContext, useReducer, useCallback } from 'react'
-import { products as initialProducts } from '../data/products'
+import { createContext, useContext, useReducer, useCallback, useEffect } from 'react'
+import { useInventory } from './InventoryContext'
 
 const CartContext = createContext(null)
 
-const initialState = {
-  items: [],
-  isOpen: false,
-  inventory: initialProducts.reduce((acc, p) => {
+function buildInventory(products) {
+  return products.reduce((acc, p) => {
     acc[p.id] = p.stock
     return acc
-  }, {}),
+  }, {})
 }
 
 function cartReducer(state, action) {
@@ -21,15 +19,22 @@ function cartReducer(state, action) {
     case 'OPEN_CART':
       return { ...state, isOpen: true }
 
+    case 'SYNC_INVENTORY': {
+      // Re-build inventory from admin changes, keeping in-cart items deducted
+      const fresh = { ...action.inventory }
+      state.items.forEach(item => {
+        if (fresh[item.id] !== undefined) fresh[item.id] = Math.max(0, fresh[item.id] - item.qty)
+      })
+      return { ...state, inventory: fresh }
+    }
+
     case 'ADD_ITEM': {
       const { product } = action
       const available = state.inventory[product.id] ?? 0
       if (available <= 0) return state
       const existing = state.items.find(i => i.id === product.id)
       const newItems = existing
-        ? state.items.map(i =>
-            i.id === product.id ? { ...i, qty: i.qty + 1 } : i
-          )
+        ? state.items.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i)
         : [...state.items, { ...product, qty: 1 }]
       return {
         ...state,
@@ -45,10 +50,7 @@ function cartReducer(state, action) {
       return {
         ...state,
         items: state.items.filter(i => i.id !== action.id),
-        inventory: {
-          ...state.inventory,
-          [action.id]: (state.inventory[action.id] ?? 0) + item.qty,
-        },
+        inventory: { ...state.inventory, [action.id]: (state.inventory[action.id] ?? 0) + item.qty },
       }
     }
 
@@ -59,10 +61,7 @@ function cartReducer(state, action) {
         return {
           ...state,
           items: state.items.filter(i => i.id !== id),
-          inventory: {
-            ...state.inventory,
-            [id]: (state.inventory[id] ?? 0) + (item?.qty ?? 0),
-          },
+          inventory: { ...state.inventory, [id]: (state.inventory[id] ?? 0) + (item?.qty ?? 0) },
         }
       }
       const existing = state.items.find(i => i.id === id)
@@ -78,7 +77,6 @@ function cartReducer(state, action) {
     }
 
     case 'CLEAR_CART': {
-      // Restore all stock
       const restoredInventory = { ...state.inventory }
       state.items.forEach(item => {
         restoredInventory[item.id] = (restoredInventory[item.id] ?? 0) + item.qty
@@ -92,7 +90,18 @@ function cartReducer(state, action) {
 }
 
 export function CartProvider({ children }) {
-  const [state, dispatch] = useReducer(cartReducer, initialState)
+  const { products } = useInventory()
+
+  const [state, dispatch] = useReducer(cartReducer, {
+    items: [],
+    isOpen: false,
+    inventory: buildInventory(products),
+  })
+
+  // Sync inventory when admin updates products
+  useEffect(() => {
+    dispatch({ type: 'SYNC_INVENTORY', inventory: buildInventory(products) })
+  }, [products])
 
   const addItem = useCallback((product) => dispatch({ type: 'ADD_ITEM', product }), [])
   const removeItem = useCallback((id) => dispatch({ type: 'REMOVE_ITEM', id }), [])
@@ -120,8 +129,7 @@ export function CartProvider({ children }) {
       '',
       '¿Pueden confirmarme disponibilidad y forma de pago? ¡Gracias! 🙏',
     ].join('\n')
-    const url = `https://wa.me/${number}?text=${encodeURIComponent(msg)}`
-    window.open(url, '_blank')
+    window.open(`https://wa.me/${number}?text=${encodeURIComponent(msg)}`, '_blank')
     clearCart()
   }, [state.items, total, clearCart])
 

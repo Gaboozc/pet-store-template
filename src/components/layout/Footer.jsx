@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+// Contact page removed — consultation happens via WhatsApp
 
 export default function Footer() {
   const storeName = import.meta.env.VITE_STORE_NAME || '[NOMBRE DE LA TIENDA]'

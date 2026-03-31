@@ -7,7 +7,6 @@ const navLinks = [
   { label: 'Catálogo', to: '/catalogo' },
   { label: 'Servicios', to: '/#servicios' },
   { label: 'Galería', to: '/#galeria' },
-  { label: 'Contacto', to: '/contacto' },
 ]
 
 export default function Navbar() {

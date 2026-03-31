@@ -3,13 +3,14 @@ import Categories from '../components/sections/Categories'
 import Services from '../components/sections/Services'
 import Gallery from '../components/sections/Gallery'
 import FAQ from '../components/sections/FAQ'
-import { products } from '../data/products'
+import { useInventory } from '../context/InventoryContext'
 import ProductCard from '../components/catalog/ProductCard'
 import { Link } from 'react-router-dom'
 
-const featured = products.filter(p => p.badge === 'Nuevo').slice(0, 3)
-
 export default function Home() {
+  const { products } = useInventory()
+  const featured = products.filter(p => p.badge === 'Nuevo').slice(0, 3)
+
   return (
     <>
       <Hero />

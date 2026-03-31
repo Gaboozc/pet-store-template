@@ -1,10 +1,11 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { products } from '../data/products'
+import { useInventory } from '../context/InventoryContext'
 import FilterBar from '../components/catalog/FilterBar'
 import ProductGrid from '../components/catalog/ProductGrid'
 
 export default function Catalog() {
+  const { products, loading, error } = useInventory()
   const [searchParams] = useSearchParams()
   const [filters, setFilters] = useState({
     category: searchParams.get('categoria') || 'todos',
@@ -23,12 +24,35 @@ export default function Catalog() {
     return products.filter(p => {
       if (filters.category !== 'todos' && p.category !== filters.category) return false
       if (filters.careLevel !== 'todos' && p.careLevel !== filters.careLevel) return false
-      if (filters.minPrice !== '' && p.price < filters.minPrice) return false
-      if (filters.maxPrice !== '' && p.price > filters.maxPrice) return false
+      if (filters.minPrice !== '' && p.price < Number(filters.minPrice)) return false
+      if (filters.maxPrice !== '' && p.price > Number(filters.maxPrice)) return false
       if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
       return true
     })
   }, [filters, search])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24 pb-20 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-ocean-700 border-t-ocean-400 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Cargando productos...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen pt-24 pb-20 flex items-center justify-center">
+        <div className="text-center">
+          <span className="text-5xl mb-4 block">⚠️</span>
+          <p className="text-red-400 font-medium mb-2">Error al cargar el catálogo</p>
+          <p className="text-gray-500 text-sm">{error}</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen pt-24 pb-20">
@@ -36,7 +60,7 @@ export default function Catalog() {
         {/* Header */}
         <div className="mb-10">
           <h1 className="section-title mb-2">Catálogo completo</h1>
-          <p className="text-gray-400">{filtered.length} productos encontrados</p>
+          <p className="text-gray-400">{filtered.length} {filtered.length === 1 ? 'producto encontrado' : 'productos encontrados'}</p>
         </div>
 
         {/* Search */}
